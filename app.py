@@ -1,10 +1,9 @@
 ﻿from flask import Flask, request, abort
 import urllib3
 import os
-
 import traceback  # 👈 引入錯誤追蹤元件，方便黑視窗看最精準的錯誤行數
 from dotenv import load_dotenv
-load_dotenv()
+
 
 # 💡 乾淨的引入：移除重複引入的元件，並確保 MessagingApiBlob 正常載入
 from linebot.v3 import WebhookHandler
@@ -30,30 +29,41 @@ from modules import rag_searcher   # 引入 PTT RAG 模組
 from modules import image_checker  # 引入獨立出的影像偵測模組
 
 #.env
-channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
-LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
+# channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
+# LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
 
 # 環境變數設定
 current_dir = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(dotenv_path=os.path.join(current_dir, '.env'))
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+load_dotenv(dotenv_path=os.path.join(current_dir, '.env'))
+
+
+channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
+
+
+configuration = Configuration(access_token=channel_access_token)
+handler = WebhookHandler(LINE_CHANNEL_SECRET)
+
 
 app = Flask(__name__)
 
-# LINE Bot 憑證 (安全起見已全面改用 .env 讀取，防止複製時斷行或空格導致 401 錯誤)
-# 💡 修正：直接把 Token 用字串接起來，確保中間那組「+JzVRR9」前面的空白被徹底消滅！
-
-configuration = Configuration(channel_access_token)
-handler = WebhookHandler(LINE_CHANNEL_SECRET)
-
 # 🔍 留下這個測試，確保啟動時它一定會顯示成功！
 print("==== 🔐 LINE Bot 憑證載入測試 ====")
-print(f"Token 實際長度: {len(configuration.access_token)} 字元 (必須是 172)")
+print(f"Token 實際長度: {len(channel_access_token)} 字元 (必須是 172)")
 # 165 資料庫網址
 CSV_URL = "https://opdadm.moi.gov.tw/api/v1/no-auth/resource/api/dataset/29E8E643-88ED-4952-B21E-BD42A3B7108C/resource/FCAF44C5-978E-405D-BCCB-4FCF16DF7D25/download"
 
 # API 金鑰輪替設定池
-API_KEYS = os.getenv('GEMINI_API_KEY')
+API_KEYS = [
+    os.getenv('GEMINI_API_KEY_1'),
+    os.getenv('GEMINI_API_KEY_2'),
+    os.getenv('GEMINI_API_KEY_3')
+]
+
+current_key_index = 0  
+
 @retry(
     stop=stop_after_attempt(3), 
     wait=wait_fixed(2),
@@ -92,6 +102,7 @@ def callback():
     except InvalidSignatureError:
         abort(400)
     except Exception:
+        traceback.print_exc()
         abort(500)
     return 'OK'
 
