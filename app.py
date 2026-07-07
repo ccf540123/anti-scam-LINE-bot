@@ -42,11 +42,8 @@ app = Flask(__name__)
 
 # LINE Bot 憑證 (安全起見已全面改用 .env 讀取，防止複製時斷行或空格導致 401 錯誤)
 # 💡 修正：直接把 Token 用字串接起來，確保中間那組「+JzVRR9」前面的空白被徹底消滅！
-channel_access_token = (
-    
-)
 
-configuration = Configuration(access_token=channel_access_token)
+configuration = Configuration(channel_access_token)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 # 🔍 留下這個測試，確保啟動時它一定會顯示成功！

@@ -35,6 +35,14 @@ pip install -r requirements.txt
 ```
 
 ### 4. 設定環境變數 (.env)
+本專案需要 LINE 機器人的憑證才能正常運作，請跟著以下步驟取得：
+
+1. 前往 [LINE Developers 主控台](https://line.biz) 並登入您的 LINE 帳號。
+2. 建立一個 **Provider**，並在下方建立一個 **Messaging API** 頻道（Channel）。
+3. 在 **Basic settings** 頁面最下方，找到並複製 **`Channel secret`**。
+4. 切換到 **Messaging API** 頁面最下方，點擊 Issue 按鈕產生並複製 **`Channel access token`**。
+5. 在本機專案根目錄下建立一個 `.env` 檔案，並將複製的金鑰填入：
+
 在專案根目錄下建立一個 `.env` 檔案，並填入您的私密金鑰：
 ```env
 LINE_CHANNEL_SECRET=您的_LINE_Channel_Secret
